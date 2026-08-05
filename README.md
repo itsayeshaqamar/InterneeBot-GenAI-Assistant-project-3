@@ -31,7 +31,28 @@ Interns at virtual platforms like **Internee.pk** often face recurring challenge
   - 📖 **Knowledge Index Browser:** One-click modal to browse official policies, LOR criteria, and evaluation benchmarks.
   - 🎫 **Support Ticket Formatter:** Helps interns draft structured tickets for human mentor escalation when needed.
   - 🚀 **Direct Task Portal Link:** 1-click launcher for `https://lms.internee.pk`.
-- **Zero Paid API Cost:** Utilizes 100% free-tier Groq API and local keyword vector indexing.
+---
+
+## 🏗️ System Architecture & Workflow Diagram
+
+```mermaid
+graph TD
+    User["Intern User"] -->|"1. Types query / Voice Dictation"| UI["Tailwind CSS Glassmorphism Frontend"]
+    UI -->|"2. POST /api/chat"| Flask["Flask Backend Web Server"]
+    
+    subgraph Pipeline["Backend Pipeline app.py"]
+        Flask -->|"3. Retrieve relevant sections"| RAG["RAG Retrieval Engine"]
+        KB[("data/knowledge_base.txt")] -->|"Index 24 Sections"| RAG
+        RAG -->|"4. Top Matching Context"| Prompt["System Prompt Generator"]
+        Prompt -->|"5. Context + Memory + User Query"| LC["LangChain ChatGroq Interface"]
+    end
+    
+    LC -->|"6. API Request llama-3.1-8b-instant"| Groq["Groq API LPU Cluster"]
+    Groq -->|"7. Generated Response"| LC
+    LC -->|"8. Formatted Response"| Flask
+    Flask -->|"9. JSON Response"| UI
+    UI -->|"10. Markdown Render & TTS Playback"| User
+```
 
 ---
 
