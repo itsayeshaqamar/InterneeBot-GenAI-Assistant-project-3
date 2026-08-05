@@ -1,0 +1,57 @@
+================================================================================
+           INTERNEE.PK OFFICIAL KNOWLEDGE BASE & GUIDELINES
+================================================================================
+
+--------------------------------------------------------------------------------
+1. ABOUT INTERNEE.PK
+--------------------------------------------------------------------------------
+- Internee.pk is Pakistan's leading virtual internship platform designed to bridge the gap between students/fresh graduates and real-world industry experience.
+- It offers hands-on project-based learning across 10+ in-demand tech tracks including Chatbot Development, Frontend/Backend Development, UI/UX Design, Mobile App Development, Artificial Intelligence, Data Science, Cyber Security, Cloud DevOps, and Digital Marketing.
+- Mission: Empowering young tech talent with real-world project portfolios, verified credentials, and career readiness.
+
+--------------------------------------------------------------------------------
+2. PROGRAM STRUCTURE & WORKFLOW
+--------------------------------------------------------------------------------
+- Project-Based Learning: Interns complete industry-standard tasks mirroring real-world workflows, taking them through the complete Software Development Life Cycle (SDLC).
+- Task Portal: Tasks, progress tracking, skill verification, and milestone submissions are managed through the official internee.pk Task Portal (https://lms.internee.pk).
+- Mentorship & Career Support: Provides professional resources including resume building, AI mock interviews, learning paths, and expert-led guidance.
+- Duration: Standard 1-Month (4-Week) or 2-Month (8-Week) project tracks.
+
+--------------------------------------------------------------------------------
+3. SUBMISSION & CERTIFICATION PROCESS
+--------------------------------------------------------------------------------
+- Task Execution: Interns work on assigned projects, push code to public GitHub repositories, and build professional portfolios.
+- Repository Rules: Public GitHub repo named `internee-pk-[domain]-task-[num]` with a clean README.md containing project setup instructions, features, and screenshots.
+- LinkedIn Showcase: Mandatory public LinkedIn post demonstrating project video demo/screenshots, mentioning @Internee.pk, and adding hashtags `#InterneePK #VirtualInternship #PakistanTech`.
+- Task Portal Submission: Provide GitHub Repo URL, LinkedIn Post URL, and Hosted Live Link on LMS task portal before the weekly deadline.
+- Verification & Completion: Successfully finishing the designated tasks and milestones unlocks skill verification badges and a recognized Certificate of Completion to build a trusted professional profile.
+- Certificate Verification: Certificates contain a unique QR Code & Verification ID verifiable 24/7 at https://internee.pk/verify.
+- Letter of Recommendation (LOR): Awarded to top 10% performing interns with 90%+ average evaluation score and active community leadership.
+
+--------------------------------------------------------------------------------
+4. LEAVE POLICIES, EXTENSIONS & STIPENDS
+--------------------------------------------------------------------------------
+- Grace Period: Automatic 48-hour grace period available upon request via portal.
+- Exam / Medical Extensions: Up to 5 additional days granted via LMS support ticket with proof.
+- Paid Bounties & Stipends: Top performers with 90%+ scores are evaluated for paid client allocations, cash bounties, and fellowship roles.
+
+--------------------------------------------------------------------------------
+5. FREQUENTLY ASKED QUESTIONS (FAQs)
+--------------------------------------------------------------------------------
+Q1: What is Internee.pk?
+A: Internee.pk is Pakistan's premier virtual internship platform offering project-based hands-on internships in 10+ tech domains.
+
+Q2: How do I submit my weekly tasks?
+A: 1) Push code to a public GitHub repo, 2) Post a demo video on LinkedIn tagging @Internee.pk, 3) Submit URLs on https://lms.internee.pk.
+
+Q3: How do I earn a Certificate of Completion?
+A: Complete all assigned tasks on the Internee.pk Task Portal with at least 70% passing score and verified LinkedIn proof of work.
+
+Q4: How do I qualify for a Letter of Recommendation (LOR)?
+A: Maintain an average score of 90%+ across all milestones and actively assist peers in community discussions.
+
+Q5: Can I request a deadline extension for exams or medical reasons?
+A: Yes, raise a support ticket on the internee.pk Task Portal attaching your exam date sheet or medical note for up to 5 days extension.
+
+Q6: Are certificates verifiable by employers?
+A: Yes, all certificates are digitally signed and verifiable at https://internee.pk/verify via QR code or ID.

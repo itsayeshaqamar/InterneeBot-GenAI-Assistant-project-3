@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterneeBot - GenAI Virtual Assistant for Internee.pk</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 4s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-10px) rotate(2deg)' },
+                        },
+                        glow: {
+                            '0%': { opacity: '0.4', filter: 'blur(25px)' },
+                            '100%': { opacity: '0.75', filter: 'blur(35px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            background: #f6f5fa;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(196, 181, 253, 0.5);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 10px 40px -5px rgba(15, 23, 42, 0.05);
+        }
+
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(230, 225, 248, 0.8);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(221, 214, 254, 0.75);
+            box-shadow: 0 12px 32px -4px rgba(124, 58, 237, 0.08);
+        }
+
+        .chat-bubble-ai {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(237, 233, 254, 0.85);
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+        }
+
+        /* 3D Orb Effect */
+        .orb-gradient {
+            background: radial-gradient(circle at 35% 35%, #ddd6fe 0%, #8b5cf6 55%, #4c1d95 100%);
+            box-shadow: 0 20px 50px rgba(139, 92, 246, 0.3), inset 0 0 25px rgba(255, 255, 255, 0.7);
+        }
+
+        /* Markdown Formatting inside Chat Bubbles */
+        .prose pre {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            border-radius: 0.875rem;
+            padding: 1rem;
+            position: relative;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.85em;
+        }
+        .prose p {
+            margin-bottom: 0.5rem;
+            line-height: 1.65;
+            color: #334155;
+        }
+        .prose ul, .prose ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.6rem;
+            list-style-type: disc;
+        }
+        .prose li {
+            margin-bottom: 0.25rem;
+        }
+        .prose h1, .prose h2, .prose h3 {
+            font-weight: 700;
+            color: #1e1b4b;
+            letter-spacing: -0.01em;
+            margin-top: 0.875rem;
+            margin-bottom: 0.375rem;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden relative selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Ambient Gradient Backdrops -->
+    <div class="fixed top-[-10%] left-[-5%] w-[45%] h-[45%] rounded-full bg-gradient-to-br from-violet-300/35 via-purple-200/25 to-pink-100/20 animate-glow pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-5%] w-[45%] h-[45%] rounded-full bg-gradient-to-tl from-purple-300/30 via-indigo-200/25 to-violet-100/20 animate-glow pointer-events-none z-0" style="animation-delay: 2s;"></div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="w-full h-full flex z-10 p-2 sm:p-4 gap-4 max-w-[1600px] mx-auto">
+
+        <!-- LEFT SIDEBAR -->
+        <aside id="sidebar" class="w-72 glass-sidebar rounded-3xl flex flex-col justify-between p-4 transition-all duration-300 shrink-0 hidden md:flex shadow-lg">
+            
+            <div class="flex flex-col gap-4">
+                <!-- Branding -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-purple-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-brand-500/20">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-extrabold text-base text-slate-900 tracking-tight leading-tight">InterneeBot</h1>
+                            <p class="text-[11px] text-brand-600 font-semibold tracking-wide uppercase">AI Virtual Assistant</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Chat Button -->
+                <button onclick="startNewChat()" class="w-full py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-brand-700 text-white font-semibold text-xs tracking-wide flex items-center justify-between transition-all duration-200 shadow-md hover:shadow-brand-500/20 group">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4 group-hover:rotate-90 transition-transform"></i>
+                        New Conversation
+                    </span>
+                    <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">⌘N</span>
+                </button>
+
+                <!-- Search Input -->
+                <div class="relative">
+                    <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="search-history" onkeyup="filterHistory()" placeholder="Search topics..." class="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-slate-100/90 border border-slate-200/80 focus:outline-none focus:border-brand-500 text-slate-700 transition">
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex flex-col gap-1 text-xs font-semibold text-slate-600">
+                    <button onclick="openLmsPortal()" class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-purple-50/80 hover:bg-brand-100 text-brand-700 border border-purple-100 transition shadow-xs group">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="external-link" class="w-4 h-4 text-brand-600"></i>
+                            <span>Task Portal</span>
+                        </span>
+                        <span class="text-[10px] bg-brand-600 text-white px-2 py-0.5 rounded-full font-bold">LMS</span>
+                    </button>
+
+                    <button onclick="openChecklistModal()" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 transition">
+                        <i data-lucide="check-square" class="w-4 h-4 text-brand-500"></i>
+                        <span>Task Checklist Tool</span>
+                    </button>
+                    <button onclick="openKnowledgeModal()" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 transition">
+                        <i data-lucide="book-open" class="w-4 h-4 text-brand-500"></i>
+                        <span>Knowledge Index & FAQs</span>
+                    </button>
+                    <button onclick="openEscalationModal()" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 transition">
+                        <i data-lucide="life-buoy" class="w-4 h-4 text-brand-500"></i>
+                        <span>Support Ticket Assistant</span>
+                    </button>
+                </nav>
+
+                <!-- Quick Queries -->
+                <div class="mt-1">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5">Frequent Topics</h3>
+                    <div id="history-list" class="flex flex-col gap-1 max-h-[200px] overflow-y-auto text-xs">
+                        <button onclick="quickPrompt('What are the exact steps to submit my tasks on LMS and LinkedIn?')" class="text-left px-3 py-1.5 rounded-lg hover:bg-purple-50 text-slate-600 truncate transition font-medium">
+                            📌 Task Submission Rules
+                        </button>
+                        <button onclick="quickPrompt('What are the criteria for completion certificate and LOR?')" class="text-left px-3 py-1.5 rounded-lg hover:bg-purple-50 text-slate-600 truncate transition font-medium">
+                            🎓 Certificate & LOR Benchmarks
+                        </button>
+                        <button onclick="quickPrompt('How do I request a deadline extension on the Task Portal?')" class="text-left px-3 py-1.5 rounded-lg hover:bg-purple-50 text-slate-600 truncate transition font-medium">
+                            ⏱️ Deadline Extension Policy
+                        </button>
+                        <button onclick="quickPrompt('Are top performers eligible for stipends and client projects?')" class="text-left px-3 py-1.5 rounded-lg hover:bg-purple-50 text-slate-600 truncate transition font-medium">
+                            ⚡ Stipends & Paid Roles
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Status Info -->
+            <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
+                <div class="flex items-center gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <div class="text-xs">
+                        <p class="font-bold text-slate-800 leading-none">RAG Knowledge Engine</p>
+                        <p id="rag-status-text" class="text-[10px] text-slate-500 mt-0.5">Online • 24 Sections Loaded</p>
+                    </div>
+                </div>
+                <button onclick="openLmsPortal()" class="w-full flex items-center justify-between text-xs text-brand-700 font-bold hover:text-brand-900 px-2 py-1 transition">
+                    <span>Visit internee.pk Task Portal</span>
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CENTER CHAT PANEL -->
+        <main class="flex-1 glass-panel rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl relative">
+            
+            <!-- HEADER BAR -->
+            <header class="py-3 px-6 border-b border-slate-200/60 flex items-center justify-between bg-white/60 backdrop-blur-md">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-slate-900 text-base tracking-tight">Internee.pk AI Assistant</span>
+                            <span class="bg-purple-100/80 text-purple-700 text-[11px] px-2.5 py-0.5 rounded-full font-bold border border-purple-200 flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3 h-3 text-purple-600"></i> llama-3.1-8b-instant
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium hidden sm:block">Instant Answers for Tasks, Guidelines, LMS Portal & Certificates</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="exportChat()" title="Export Chat Transcript" class="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs">
+                        <i data-lucide="download" class="w-3.5 h-3.5 text-slate-500"></i>
+                        <span class="hidden sm:inline">Export</span>
+                    </button>
+                    <button onclick="clearChat()" title="Clear Chat" class="py-1.5 px-3 rounded-xl bg-white hover:bg-red-50 text-red-600 border border-slate-200/80 hover:border-red-200 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Clear</span>
+                    </button>
+                    <!-- GUARANTEED WORKING LMS PORTAL BUTTON -->
+                    <button onclick="openLmsPortal()" class="py-2 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-md shadow-brand-500/20 active:scale-95 cursor-pointer">
+                        <span>Task Portal</span>
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CHAT MESSAGES AREA -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-6">
+                
+                <!-- EMPTY HERO STATE -->
+                <div id="hero-welcome" class="m-auto max-w-2xl text-center flex flex-col items-center justify-center py-6 px-4 animate-fade-in">
+                    
+                    <!-- 3D Glowing Orb -->
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full orb-gradient animate-float flex items-center justify-center mb-5 relative">
+                        <div class="w-full h-full rounded-full bg-white/20 backdrop-blur-sm animate-pulse-slow"></div>
+                        <i data-lucide="sparkles" class="w-9 h-9 text-white absolute"></i>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2 tracking-tight">
+                        Hello, Intern! <span class="bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent">How can I assist you today?</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 max-w-md mb-8 leading-relaxed font-medium">
+                        Your 24/7 AI mentor for Internee.pk. Ask anything about task submissions, internee.pk Task Portal, certificates, or stipend criteria.
+                    </p>
+
+                    <!-- QUICK SUGGESTION CARDS -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full text-left">
+                        
+                        <div onclick="quickPrompt('What are the exact steps to submit my weekly task on LMS and LinkedIn?')" class="p-4 rounded-2xl bg-white/90 hover:bg-white border border-purple-100 hover:border-brand-300 shadow-xs hover:shadow-md transition cursor-pointer group">
+                            <div class="flex items-center gap-3 mb-1.5">
+                                <div class="p-2 rounded-xl bg-purple-100 text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition">
+                                    <i data-lucide="code" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Task Submission Rules</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-normal">GitHub repo setup, mandatory LinkedIn tagging `@Internee.pk` & Task Portal links.</p>
+                        </div>
+
+                        <div onclick="quickPrompt('How do I earn an Internship Completion Certificate and Letter of Recommendation (LOR)?')" class="p-4 rounded-2xl bg-white/90 hover:bg-white border border-purple-100 hover:border-brand-300 shadow-xs hover:shadow-md transition cursor-pointer group">
+                            <div class="flex items-center gap-3 mb-1.5">
+                                <div class="p-2 rounded-xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition">
+                                    <i data-lucide="award" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Certificates & LOR</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-normal">70%+ score for Certificate, 90%+ for LOR & QR verification online.</p>
+                        </div>
+
+                        <div onclick="quickPrompt('What should I do if I need a deadline extension or medical leave?')" class="p-4 rounded-2xl bg-white/90 hover:bg-white border border-purple-100 hover:border-brand-300 shadow-xs hover:shadow-md transition cursor-pointer group">
+                            <div class="flex items-center gap-3 mb-1.5">
+                                <div class="p-2 rounded-xl bg-pink-100 text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Deadline Extensions</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-normal">48h grace period & exam extension up to 5 days via Task Portal.</p>
+                        </div>
+
+                        <div onclick="quickPrompt('How are interns selected for stipends, bounties, and paid client projects?')" class="p-4 rounded-2xl bg-white/90 hover:bg-white border border-purple-100 hover:border-brand-300 shadow-xs hover:shadow-md transition cursor-pointer group">
+                            <div class="flex items-center gap-3 mb-1.5">
+                                <div class="p-2 rounded-xl bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition">
+                                    <i data-lucide="zap" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Stipends & Bounties</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 leading-normal">Top performer selection, cash bounties & client allocations.</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MESSAGES LIST CONTAINER -->
+                <div id="messages-container" class="flex flex-col gap-5 hidden">
+                    <!-- Dynamic Messages -->
+                </div>
+
+            </div>
+
+            <!-- FLOATING INPUT CONTAINER -->
+            <div class="p-4 sm:p-6 bg-gradient-to-t from-white/95 via-white/60 to-transparent">
+                
+                <!-- Quick Prompt Pills Bar -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs">
+                    <span class="text-slate-400 font-bold whitespace-nowrap text-[11px] uppercase tracking-wider">Suggested:</span>
+                    <button onclick="quickPrompt('What hashtags are mandatory for LinkedIn posts?')" class="px-3 py-1 rounded-full bg-white hover:bg-purple-50 text-slate-700 border border-slate-200/80 whitespace-nowrap transition font-medium">
+                        🏷️ Mandatory Hashtags
+                    </button>
+                    <button onclick="quickPrompt('Where can I host my web development project for free?')" class="px-3 py-1 rounded-full bg-white hover:bg-purple-50 text-slate-700 border border-slate-200/80 whitespace-nowrap transition font-medium">
+                        🌐 Free Project Hosting
+                    </button>
+                    <button onclick="quickPrompt('What happens if I submit my task late?')" class="px-3 py-1 rounded-full bg-white hover:bg-purple-50 text-slate-700 border border-slate-200/80 whitespace-nowrap transition font-medium">
+                        ⚠️ Late Deduction Rules
+                    </button>
+                </div>
+
+                <!-- Input Box -->
+                <div class="glass-input rounded-2xl p-2.5 sm:p-3 flex flex-col gap-2 relative">
+                    <textarea id="user-input" rows="1" oninput="autoResizeTextarea(this)" onkeydown="handleKeyDown(event)" placeholder="Ask me anything about Internee.pk tasks, portal & rules..." class="w-full bg-transparent border-0 focus:ring-0 focus:outline-none text-slate-800 text-sm font-medium resize-none max-h-32 px-2 pt-1"></textarea>
+                    
+                    <div class="flex items-center justify-between border-t border-purple-100/60 pt-2">
+                        <div class="flex items-center gap-1 sm:gap-2 text-slate-400">
+                            <!-- Voice Input -->
+                            <button id="voice-btn" onclick="toggleVoiceInput()" title="Voice Dictation" class="p-2 rounded-xl hover:bg-purple-100/60 hover:text-brand-600 transition">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                            <!-- Checklist Shortcut -->
+                            <button onclick="openChecklistModal()" title="Task Checklist Generator" class="p-2 rounded-xl hover:bg-purple-100/60 hover:text-brand-600 transition flex items-center gap-1.5 text-xs font-semibold">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-500"></i>
+                                <span class="hidden sm:inline">Checklist Tool</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">Press Enter to send</span>
+                            <button id="send-btn" onclick="sendMessage()" class="py-2 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-brand-500/20 active:scale-95 cursor-pointer">
+                                <span>Send</span>
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: CHECKLIST TOOL -->
+    <div id="checklist-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-white/95 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-white max-h-[85vh] flex flex-col justify-between animate-fade-in">
+            <div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 rounded-xl bg-brand-100 text-brand-600">
+                            <i data-lucide="check-square" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900">Task Submission Checklist</h3>
+                    </div>
+                    <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Domain</label>
+                        <select id="checklist-domain" class="w-full text-xs font-medium rounded-xl bg-slate-100 border border-slate-200 p-2.5 text-slate-800 focus:outline-none focus:border-brand-500">
+                            <option value="Web Development">Web Development</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="AI & Machine Learning">AI & Machine Learning</option>
+                            <option value="Mobile App Dev">Mobile App Dev</option>
+                            <option value="Cyber Security">Cyber Security</option>
+                            <option value="Graphic Design">Graphic Design</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Task Number</label>
+                        <select id="checklist-task" class="w-full text-xs font-medium rounded-xl bg-slate-100 border border-slate-200 p-2.5 text-slate-800 focus:outline-none focus:border-brand-500">
+                            <option value="1">Task 1</option>
+                            <option value="2">Task 2</option>
+                            <option value="3">Task 3</option>
+                            <option value="4">Task 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="generateChecklist()" class="w-full py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs mb-4 transition shadow-xs">
+                    Generate Custom Checklist
+                </button>
+
+                <div id="checklist-content" class="max-h-[300px] overflow-y-auto space-y-3 text-xs pr-1">
+                    <p class="text-slate-400 italic text-center py-4 font-medium">Select your domain above to generate your submission checklist.</p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 text-right">
+                <button onclick="closeChecklistModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: KNOWLEDGE BASE BROWSER -->
+    <div id="knowledge-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-white/95 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-white max-h-[85vh] flex flex-col justify-between animate-fade-in">
+            <div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 rounded-xl bg-indigo-100 text-indigo-600">
+                            <i data-lucide="book-open" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900">Internee.pk Policy & Guidelines Index</h3>
+                    </div>
+                    <button onclick="closeKnowledgeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4 max-h-[450px] overflow-y-auto text-xs text-slate-600 pr-2">
+                    <div class="p-3.5 bg-purple-50/80 rounded-2xl border border-purple-100">
+                        <h4 class="font-bold text-brand-900 text-sm mb-1">📌 Submission Requirements</h4>
+                        <ul class="list-disc pl-4 space-y-1 font-medium text-slate-700">
+                            <li><strong>GitHub Repo:</strong> Public repo `internee-pk-[domain]-task-[num]` with full README.md.</li>
+                            <li><strong>LinkedIn Showcase:</strong> Tag `@Internee.pk` + demo video + hashtags `#InterneePK #VirtualInternship`.</li>
+                            <li><strong>Task Portal:</strong> Submit GitHub & LinkedIn URLs on `https://lms.internee.pk`.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">🎓 Certificate & LOR Benchmarks</h4>
+                        <ul class="list-disc pl-4 space-y-1 font-medium text-slate-700">
+                            <li><strong>Completion Certificate:</strong> Submit designated tasks with 70%+ score.</li>
+                            <li><strong>Letter of Recommendation (LOR):</strong> 90%+ average score + active community support.</li>
+                            <li><strong>Verification:</strong> Verifiable 24/7 at `https://internee.pk/verify`.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 text-right">
+                <button onclick="closeKnowledgeModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: ESCALATION MODAL -->
+    <div id="escalation-modal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel bg-white/95 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-white max-h-[85vh] flex flex-col justify-between animate-fade-in">
+            <div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 rounded-xl bg-amber-100 text-amber-600">
+                            <i data-lucide="life-buoy" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-base text-slate-900">Support Ticket Assistant</h3>
+                    </div>
+                    <button onclick="closeEscalationModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs text-slate-500 mb-3 font-medium">Format a clean support request for Discord or internee.pk Task Portal.</p>
+
+                <div class="space-y-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Issue Category</label>
+                        <select id="ticket-category" class="w-full text-xs font-medium rounded-xl bg-slate-100 border border-slate-200 p-2.5 text-slate-800">
+                            <option value="Task Portal Login Issue">Task Portal Login Issue</option>
+                            <option value="Task Submission Error">Task Submission Error</option>
+                            <option value="Deadline Extension Request">Deadline Extension Request</option>
+                            <option value="Certificate Verification Issue">Certificate Verification Issue</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Description</label>
+                        <textarea id="ticket-desc" rows="3" placeholder="Describe the issue..." class="w-full text-xs font-medium rounded-xl bg-slate-100 border border-slate-200 p-2.5 text-slate-800"></textarea>
+                    </div>
+                    <button onclick="formatTicket()" class="w-full py-2 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition">
+                        Generate Formatted Ticket
+                    </button>
+                </div>
+
+                <div id="formatted-ticket-output" class="hidden">
+                    <textarea id="ticket-result" rows="4" readonly class="w-full text-xs font-mono rounded-xl bg-slate-900 text-emerald-400 p-2.5 border border-slate-800"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 text-right">
+                <button onclick="closeEscalationModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let conversationHistory = [];
+        let isProcessing = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            checkSystemStatus();
+        });
+
+        // LMS PORTAL REDIRECT FUNCTION (Guaranteed Working)
+        function openLmsPortal() {
+            window.open('https://lms.internee.pk', '_blank', 'noopener,noreferrer');
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                if(data.rag_status && data.rag_status.total_chunks) {
+                    document.getElementById('rag-status-text').innerText = `Online • ${data.rag_status.total_chunks} Sections Loaded`;
+                }
+            } catch(e) {
+                console.log("Status check err:", e);
+            }
+        }
+
+        function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function startNewChat() {
+            conversationHistory = [];
+            document.getElementById('messages-container').innerHTML = '';
+            document.getElementById('messages-container').classList.add('hidden');
+            document.getElementById('hero-welcome').classList.remove('hidden');
+            document.getElementById('user-input').value = '';
+        }
+
+        function quickPrompt(text) {
+            document.getElementById('user-input').value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('user-input');
+            const messageText = inputEl.value.trim();
+
+            if (!messageText || isProcessing) return;
+
+            document.getElementById('hero-welcome').classList.add('hidden');
+            const msgContainer = document.getElementById('messages-container');
+            msgContainer.classList.remove('hidden');
+
+            appendUserMessage(messageText);
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+            isProcessing = true;
+
+            const typingId = appendTypingIndicator();
+            scrollToBottom();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: messageText,
+                        history: conversationHistory
+                    })
+                });
+
+                const data = await response.json();
+                removeElement(typingId);
+
+                if (response.ok && data.response) {
+                    appendAIMessage(data.response);
+                    conversationHistory.push({ role: 'user', content: messageText });
+                    conversationHistory.push({ role: 'assistant', content: data.response });
+                } else {
+                    appendAIMessage(data.response || data.error || 'An unexpected error occurred.');
+                }
+
+            } catch (err) {
+                removeElement(typingId);
+                appendAIMessage('⚠️ Connection issue. Please verify backend Flask server status.');
+            } finally {
+                isProcessing = false;
+                scrollToBottom();
+            }
+        }
+
+        function appendUserMessage(text) {
+            const container = document.getElementById('messages-container');
+            const userHtml = `
+                <div class="flex justify-end items-start gap-2.5 animate-fade-in">
+                    <div class="max-w-[85%] sm:max-w-[70%] bg-slate-900 text-white rounded-2xl rounded-tr-xs px-4 py-3 shadow-md">
+                        <p class="text-xs sm:text-sm font-medium leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                        You
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', userHtml);
+        }
+
+        function appendAIMessage(markdownText) {
+            const container = document.getElementById('messages-container');
+            const msgId = 'ai-msg-' + Date.now();
+            const renderedHtml = marked.parse(markdownText);
+
+            const aiHtml = `
+                <div class="flex items-start gap-3 animate-fade-in">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-md shadow-brand-500/20">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                    </div>
+                    <div class="max-w-[90%] sm:max-w-[80%] chat-bubble-ai rounded-2xl rounded-tl-xs p-4 sm:p-5">
+                        <div id="${msgId}" class="prose text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">
+                            ${renderedHtml}
+                        </div>
+                        
+                        <div class="mt-3 pt-2 border-t border-purple-100 flex items-center justify-between text-xs text-slate-400">
+                            <span class="text-[10px] text-purple-700 font-bold">InterneeBot • llama-3.1-8b-instant</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="speakText('${msgId}')" title="Read Aloud" class="hover:text-brand-600 p-1 rounded">
+                                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="copyMsgText('${msgId}')" title="Copy Answer" class="hover:text-brand-600 p-1 rounded">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', aiHtml);
+            lucide.createIcons();
+
+            document.querySelectorAll(`#${msgId} pre code`).forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
+
+        function appendTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const container = document.getElementById('messages-container');
+            const html = `
+                <div id="${id}" class="flex items-start gap-3 animate-fade-in">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                    </div>
+                    <div class="chat-bubble-ai rounded-2xl rounded-tl-xs px-4 py-3 flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-brand-500 animate-bounce"></div>
+                        <div class="w-2 h-2 rounded-full bg-brand-500 animate-bounce" style="animation-delay: 0.15s"></div>
+                        <div class="w-2 h-2 rounded-full bg-brand-500 animate-bounce" style="animation-delay: 0.3s"></div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            lucide.createIcons();
+            return id;
+        }
+
+        function removeElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function scrollToBottom() {
+            const chatMsgs = document.getElementById('chat-messages');
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        function clearChat() {
+            if (confirm("Clear current conversation?")) {
+                startNewChat();
+            }
+        }
+
+        function exportChat() {
+            if (conversationHistory.length === 0) {
+                alert("No chat conversation to export.");
+                return;
+            }
+            let exportStr = "# InterneeBot Chat Transcript\n\n";
+            conversationHistory.forEach(msg => {
+                exportStr += `### ${msg.role.toUpperCase()}\n${msg.content}\n\n`;
+            });
+
+            const blob = new Blob([exportStr], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `interneebot-transcript-${Date.now()}.md`;
+            a.click();
+        }
+
+        function speakText(msgId) {
+            const text = document.getElementById(msgId).innerText;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function copyMsgText(msgId) {
+            const text = document.getElementById(msgId).innerText;
+            navigator.clipboard.writeText(text);
+            alert("Answer copied to clipboard!");
+        }
+
+        function toggleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser.");
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            const voiceBtn = document.getElementById('voice-btn');
+
+            recognition.onstart = () => {
+                voiceBtn.classList.add('text-red-500', 'animate-pulse');
+            };
+            recognition.onresult = (event) => {
+                document.getElementById('user-input').value = event.results[0][0].transcript;
+            };
+            recognition.onend = () => {
+                voiceBtn.classList.remove('text-red-500', 'animate-pulse');
+            };
+            recognition.start();
+        }
+
+        function openChecklistModal() { document.getElementById('checklist-modal').classList.remove('hidden'); }
+        function closeChecklistModal() { document.getElementById('checklist-modal').classList.add('hidden'); }
+        
+        function openKnowledgeModal() { document.getElementById('knowledge-modal').classList.remove('hidden'); }
+        function closeKnowledgeModal() { document.getElementById('knowledge-modal').classList.add('hidden'); }
+        
+        function openEscalationModal() { document.getElementById('escalation-modal').classList.remove('hidden'); }
+        function closeEscalationModal() { document.getElementById('escalation-modal').classList.add('hidden'); }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
+
+        async function generateChecklist() {
+            const domain = document.getElementById('checklist-domain').value;
+            const task = document.getElementById('checklist-task').value;
+            const container = document.getElementById('checklist-content');
+
+            container.innerHTML = '<p class="text-center text-brand-600 font-bold py-4">Generating checklist...</p>';
+
+            try {
+                const res = await fetch('/api/checklist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domain: domain, task_number: task })
+                });
+                const data = await res.json();
+                
+                let html = `<p class="font-bold text-slate-900 text-xs mb-2">Checklist for ${data.domain} - Task ${data.task_number}:</p>`;
+                data.steps.forEach(sec => {
+                    html += `
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                            <h5 class="font-bold text-brand-700 text-xs mb-1.5">${sec.category}</h5>
+                            <div class="space-y-1">
+                    `;
+                    sec.items.forEach(item => {
+                        html += `
+                            <label class="flex items-start gap-2 cursor-pointer hover:text-slate-900 font-medium">
+                                <input type="checkbox" class="mt-0.5 rounded text-brand-600 focus:ring-brand-500">
+                                <span>${item}</span>
+                            </label>
+                        `;
+                    });
+                    html += `</div></div>`;
+                });
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p class="text-red-500 py-2">Failed to generate checklist.</p>';
+            }
+        }
+
+        function formatTicket() {
+            const cat = document.getElementById('ticket-category').value;
+            const desc = document.getElementById('ticket-desc').value.trim() || 'Described above.';
+            const result = `================================================
+[INTERNEE.PK SUPPORT TICKET]
+Category: ${cat}
+Date: ${new Date().toLocaleDateString()}
+Details: ${desc}
+User Status: Pending Mentor Assistance
+================================================`;
+            
+            document.getElementById('ticket-result').value = result;
+            document.getElementById('formatted-ticket-output').classList.remove('hidden');
+        }
+
+        function filterHistory() {
+            const query = document.getElementById('search-history').value.toLowerCase();
+            const buttons = document.querySelectorAll('#history-list button');
+            buttons.forEach(b => {
+                if (b.innerText.toLowerCase().includes(query)) {
+                    b.style.display = 'block';
+                } else {
+                    b.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
