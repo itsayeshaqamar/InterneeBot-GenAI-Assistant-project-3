@@ -10,21 +10,21 @@ InterneeBot follows a modular **Retrieval-Augmented Generation (RAG)** architect
 
 ```mermaid
 graph TD
-    User([Intern User]) -->|1. Types query / Uses Voice Dictation| UI[Tailwind CSS Glassmorphism Frontend]
-    UI -->|2. POST /api/chat {message, history}| Flask[Flask Backend Web Server]
+    User["Intern User"] -->|"1. Types query / Voice Dictation"| UI["Tailwind CSS Glassmorphism Frontend"]
+    UI -->|"2. POST /api/chat"| Flask["Flask Backend Web Server"]
     
-    subgraph Backend Pipeline app.py
-        Flask -->|3. Retrieve relevant sections| RAG[RAG Retrieval Engine]
-        KB[(data/knowledge_base.txt)] -->|Index 24 Sections| RAG
-        RAG -->|4. Top Matching Context| Prompt[System Prompt Generator]
-        Prompt -->|5. Context + Memory + User Query| LC[LangChain ChatGroq Interface]
+    subgraph Pipeline["Backend Pipeline app.py"]
+        Flask -->|"3. Retrieve relevant sections"| RAG["RAG Retrieval Engine"]
+        KB[("data/knowledge_base.txt")] -->|"Index 24 Sections"| RAG
+        RAG -->|"4. Top Matching Context"| Prompt["System Prompt Generator"]
+        Prompt -->|"5. Context + Memory + User Query"| LC["LangChain ChatGroq Interface"]
     end
     
-    LC -->|6. API Request llama-3.1-8b-instant| Groq[Groq API LPU Cluster]
-    Groq -->|7. Generated Response| LC
-    LC -->|8. Formatted Response| Flask
-    Flask -->|9. JSON Response {response, model}| UI
-    UI -->|10. Markdown Render & TTS Playback| User
+    LC -->|"6. API Request llama-3.1-8b-instant"| Groq["Groq API LPU Cluster"]
+    Groq -->|"7. Generated Response"| LC
+    LC -->|"8. Formatted Response"| Flask
+    Flask -->|"9. JSON Response"| UI
+    UI -->|"10. Markdown Render & TTS Playback"| User
 ```
 
 ---
